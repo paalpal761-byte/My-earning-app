@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+to<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -54,21 +54,22 @@
 </div>
 
 <script>
-    // Aapki Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyDsve6KNF0pr8X9f7dR8T735lh3hdl7Vb0",
-        authDomain: "my-earning-app-78540.firebaseapp.com",
-        databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
-        projectId: "my-earning-app-78540",
-        storageBucket: "my-earning-app-78540.firebasestorage.app",
-        messagingSenderId: "646826042515",
-        appId: "1:646826042515:web:a68e3bf1c284808e691966"
-    };
+// Aapki Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDsvE6KNf0pr8X9F7dR8T735lh3hdl7Vb8",
+  authDomain: "my-earning-app-78540.firebaseapp.com",
+  databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
+  projectId: "my-earning-app-78540",
+  storageBucket: "my-earning-app-78540.firebasestorage.app",
+  messagingSenderId: "646826042515",
+  appId: "1:646826042515:web:a68a3bf1c284808e691966",
+  measurementId: "G-FTB7N9BYR9"
+};
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
-    let confirmationResult;
+// Ise initialize karein
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
 
     // Recaptcha Setup
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
