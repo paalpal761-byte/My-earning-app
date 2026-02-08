@@ -1,21 +1,21 @@
-to<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dhamaka Earning App - Secure</title>
+    <title>Dhanaka Earning App - Secure</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.unityads.unity3d.com/sdk/4.0.0/unity-ads-sdk.js"></script>
+    <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f0f2f5; margin: 0; padding-bottom: 20px; }
         .header { background: #128C7E; color: white; padding: 20px; font-size: 22px; font-weight: bold; }
         .card { background: white; margin: 15px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn { background: #25D366; color: white; padding: 15px; border: none; border-radius: 25px; font-size: 18px; width: 90%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn { background: #25D366; color: white; padding: 15px; border: none; border-radius: 25px; font-size: 18px; width: 85%; cursor: pointer; margin-top: 10px; }
         .btn:disabled { background: #ccc; }
         .balance { font-size: 45px; color: #128C7E; font-weight: bold; }
-        input { padding: 12px; width: 85%; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 16px; }
-        #recaptcha-container { margin: 10px auto; }
+        input { padding: 12px; width: 80%; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -27,7 +27,6 @@ to<!DOCTYPE html>
         <input type="text" id="phone" placeholder="+91 9876543210">
         <div id="recaptcha-container"></div>
         <button class="btn" onclick="sendOTP()" id="send-btn">Send OTP</button>
-        
         <div id="otp-div" style="display:none; margin-top:20px;">
             <input type="number" id="otp" placeholder="6 Digit OTP">
             <button class="btn" style="background:#3498db;" onclick="verifyOTP()">Verify & Start</button>
@@ -43,7 +42,7 @@ to<!DOCTYPE html>
     </div>
     <div class="card">
         <h3>Daily Task</h3>
-<button class="btn" style="background:#3498db;" onclick="watchAd()">Watch Video (₹0.10)</button>
+        <button class="btn" style="background:#3498db;" onclick="watchAd()">Watch Video (₹0.10)</button>
     </div>
     <div class="card">
         <h3>Withdraw</h3>
@@ -54,102 +53,81 @@ to<!DOCTYPE html>
 </div>
 
 <script>
-// Aapki Firebase Config
+// Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDsvE6KNf0pr8X9F7dR8T735lh3hdl7Vb8",
-  authDomain: "my-earning-app-78540.firebaseapp.com",
-  databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
-  projectId: "my-earning-app-78540",
-  storageBucket: "my-earning-app-78540.firebasestorage.app",
-  messagingSenderId: "646826042515",
-  appId: "1:646826042515:web:a68a3bf1c284808e691966",
-  measurementId: "G-FTB7N9BYR9"
+    apiKey: "AIzaSyDsvE6RNfQpr8X9F7dR3T735lh3hd17Vb8",
+    authDomain: "my-earning-app-78540.firebaseapp.com",
+    databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
+    projectId: "my-earning-app-78540",
+    storageBucket: "my-earning-app-78540.appspot.com",
+    messagingSenderId: "646826042515",
+    appId: "1:646826042515:web:a68a3bf1c28480e691966",
+    measurementId: "G-FTB7N9BYR9"
 };
 
-// Ise initialize karein
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
-// Unity Ads chalu karein
+
+// Unity Ads Initialize
 unityads.UnityAds.initialize("6042395", true);
-    // Recaptcha Setup
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        'size': 'invisible'
-    });
 
-    function sendOTP() {
-        const phoneNumber = document.getElementById('phone').value;
-        auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-            .then((result) => {
-                confirmationResult = result;
-                document.getElementById('otp-div').style.display = 'block';
-                document.getElementById('send-btn').disabled = true;
-                alert("OTP Bhej diya gaya hai!");
-            }).catch((err) => alert("Error: " + err.message));
-    }
+let confirmationResult;
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
 
-    function verifyOTP() {
-        const code = document.getElementById('otp').value;
-        confirmationResult.confirm(code).then((result) => {
-            const user = result.user;
-            showDashboard(user);
-        }).catch(() => alert("Galat OTP!"));
-    }
+function sendOTP() {
+    const phoneNumber = document.getElementById('phone').value;
+    auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+        .then((result) => {
+            confirmationResult = result;
+            document.getElementById('otp-div').style.display = 'block';
+            document.getElementById('send-btn').disabled = true;
+            alert("OTP Bheja gaya hai!");
+        });
+}
 
-    function showDashboard(user) {
+function verifyOTP() {
+    const code = document.getElementById('otp').value;
+    confirmationResult.confirm(code).then((result) => {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
-        
-        const userRef = database.ref('users/' + user.uid);
-        userRef.on('value', (snapshot) => {
-            if (!snapshot.exists()) {
-                userRef.set({ balance: 0, phone: user.phoneNumber });
-            } else {
-                document.getElementById('user-balance').innerText = snapshot.val().balance;
-            }
-        });
-    }
+        loadUserData(result.user.uid);
+    });
+}
 
-    function watchAd() {
-        const user = auth.currentUser;
-        if(!user) return;
-        
-        alert("Video loading...");
-        setTimeout(() => {
-            database.ref('users/' + user.uid + '/balance').transaction((current) => {
-                return (current || 0) + 5;
+function loadUserData(uid) {
+    database.ref('users/' + uid).on('value', (snapshot) => {
+        const data = snapshot.val() || { balance: 0 };
+        document.getElementById('user-balance').innerText = data.balance.toFixed(2);
+    });
+}
+
+// Asli Ads wala function
+function watchAd() {
+    unityads.UnityAds.show("Rewarded_Android", {
+        onComplete: () => {
+            const userRef = database.ref('users/' + auth.currentUser.uid);
+            userRef.once('value').then((snapshot) => {
+                const currentBalance = (snapshot.val() && snapshot.val().balance) ? snapshot.val().balance : 0;
+                userRef.update({ balance: currentBalance + 0.10 });
+                alert("Mubarak ho! ₹0.10 jod diye gaye hain.");
             });
-            alert("₹5 Add ho gaye!");
-        }, 5000);
-    }
+        },
+        onFailed: (error) => {
+            alert("Video abhi load nahi hua, 1 minute baad koshish karein.");
+        }
+    });
+}
 
-    function withdraw() {
-        const user = auth.currentUser;
-        const upi = document.getElementById('upi').value;
-        if(!upi.includes('@')) return alert("Sahi UPI daalein");
+function withdraw() {
+    const upi = document.getElementById('upi').value;
+    if(!upi) return alert("UPI ID daalein");
+    alert("Request bhej di gayi hai. 24 ghante mein paise mil jayenge.");
+}
 
-        const userRef = database.ref('users/' + user.uid);
-        userRef.once('value', (snapshot) => {
-            const bal = snapshot.val().balance;
-            if(bal >= 100) {
-                database.ref('requests').push({
-                    uid: user.uid,
-                    phone: user.phoneNumber,
-                    amount: bal,
-                    upi: upi,
-                    status: "Pending"
-                }).then(() => {
-                    userRef.update({ balance: 0 });
-                    alert("Request Sent!");
-                });
-            } else { alert("Minimum ₹100 chahiye!"); }
-        });
-    }
-
-    function logout() {
-        auth.signOut().then(() => location.reload());
-    }
+function logout() {
+    auth.signOut().then(() => location.reload());
+}
 </script>
 </body>
-  </html> 
-
+</html>
