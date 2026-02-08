@@ -7,7 +7,7 @@ to<!DOCTYPE html>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <style>
+    <script src="https://cdn.unityads.unity3d.com/sdk/4.0.0/unity-ads-sdk.js"></script>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f0f2f5; margin: 0; padding-bottom: 20px; }
         .header { background: #128C7E; color: white; padding: 20px; font-size: 22px; font-weight: bold; }
         .card { background: white; margin: 15px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -70,7 +70,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
-
+// Unity Ads chalu karein
+unityads.UnityAds.initialize("6042395", true);
     // Recaptcha Setup
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
         'size': 'invisible'
