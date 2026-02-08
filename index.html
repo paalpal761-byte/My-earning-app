@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhamaka Earning App - Secure</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f0f2f5; margin: 0; padding-bottom: 20px; }
+        .header { background: #128C7E; color: white; padding: 20px; font-size: 22px; font-weight: bold; }
+        .card { background: white; margin: 15px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn { background: #25D366; color: white; padding: 15px; border: none; border-radius: 25px; font-size: 18px; width: 90%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn:disabled { background: #ccc; }
+        .balance { font-size: 45px; color: #128C7E; font-weight: bold; }
+        input { padding: 12px; width: 85%; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 16px; }
+        #recaptcha-container { margin: 10px auto; }
+    </style>
+</head>
+<body>
+
+<div id="login-section">
+    <div class="header">Secure Login</div>
+    <div class="card">
+        <p>Mobile Number (with +91)</p>
+        <input type="text" id="phone" placeholder="+91 9876543210">
+        <div id="recaptcha-container"></div>
+        <button class="btn" onclick="sendOTP()" id="send-btn">Send OTP</button>
+        
+        <div id="otp-div" style="display:none; margin-top:20px;">
+            <input type="number" id="otp" placeholder="6 Digit OTP">
+            <button class="btn" style="background:#3498db;" onclick="verifyOTP()">Verify & Start</button>
+        </div>
+    </div>
+</div>
+
+<div id="main-app" style="display:none;">
+    <div class="header">Dashboard</div>
+    <div class="card">
+        <p>Aapki Kamayi:</p>
+        <div class="balance">₹ <span id="user-balance">0</span></div>
+    </div>
+    <div class="card">
+        <h3>Daily Task</h3>
+        <button class="btn" style="background:#3498db;" onclick="watchAd()">Watch Video (₹5)</button>
+    </div>
+    <div class="card">
+        <h3>Withdraw</h3>
+        <input type="text" id="upi" placeholder="UPI ID">
+        <button class="btn" style="background:#e74c3c;" onclick="withdraw()">Withdraw Money</button>
+    </div>
+    <button class="btn" style="background:#777; width:50%;" onclick="logout()">Logout</button>
+</div>
+
+<script>
+    // Aapki Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDsve6KNF0pr8X9f7dR8T735lh3hdl7Vb0",
+        authDomain: "my-earning-app-78540.firebaseapp.com",
+        databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
+        projectId: "my-earning-app-78540",
+        storageBucket: "my-earning-app-78540.firebasestorage.app",
+        messagingSenderId: "646826042515",
+        appId: "1:646826042515:web:a68e3bf1c284808e691966"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    let confirmationResult;
+
+    // Recaptcha Setup
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'invisible'
+    });
+
+    function sendOTP() {
+        const phoneNumber = document.getElementById('phone').value;
+        auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+            .then((result) => {
+                confirmationResult = result;
+                document.getElementById('otp-div').style.display = 'block';
+                document.getElementById('send-btn').disabled = true;
+                alert("OTP Bhej diya gaya hai!");
+            }).catch((err) => alert("Error: " + err.message));
+    }
+
+    function verifyOTP() {
+        const code = document.getElementById('otp').value;
+        confirmationResult.confirm(code).then((result) => {
+            const user = result.user;
+            showDashboard(user);
+        }).catch(() => alert("Galat OTP!"));
+    }
+
+    function showDashboard(user) {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        
+        const userRef = database.ref('users/' + user.uid);
+        userRef.on('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                userRef.set({ balance: 0, phone: user.phoneNumber });
+            } else {
+                document.getElementById('user-balance').innerText = snapshot.val().balance;
+            }
+        });
+    }
+
+    function watchAd() {
+        const user = auth.currentUser;
+        if(!user) return;
+        
+        alert("Video loading...");
+        setTimeout(() => {
+            database.ref('users/' + user.uid + '/balance').transaction((current) => {
+                return (current || 0) + 5;
+            });
+            alert("₹5 Add ho gaye!");
+        }, 5000);
+    }
+
+    function withdraw() {
+        const user = auth.currentUser;
+        const upi = document.getElementById('upi').value;
+        if(!upi.includes('@')) return alert("Sahi UPI daalein");
+
+        const userRef = database.ref('users/' + user.uid);
+        userRef.once('value', (snapshot) => {
+            const bal = snapshot.val().balance;
+            if(bal >= 100) {
+                database.ref('requests').push({
+                    uid: user.uid,
+                    phone: user.phoneNumber,
+                    amount: bal,
+                    upi: upi,
+                    status: "Pending"
+                }).then(() => {
+                    userRef.update({ balance: 0 });
+                    alert("Request Sent!");
+                });
+            } else { alert("Minimum ₹100 chahiye!"); }
+        });
+    }
+
+    function logout() {
+        auth.signOut().then(() => location.reload());
+    }
+</script>
+</body>
+  </html> 
+
