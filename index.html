@@ -7,13 +7,12 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdn.unityads.unity3d.com/sdk/4.0.0/unity-ads-sdk.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f4f4f4; padding: 10px; }
         .card { background: white; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 400px; }
         .btn { background: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
         input { padding: 12px; width: 90%; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        #recaptcha-container { margin: 10px 0; }
+        #recaptcha-container { margin: 10px 0; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
@@ -24,7 +23,6 @@
         <input type="text" id="phone" placeholder="+91 9876543210">
         <div id="recaptcha-container"></div>
         <button class="btn" onclick="sendOTP()" id="send-btn">Send OTP</button>
-        
         <div id="otp-div" style="display:none; margin-top:20px;">
             <input type="number" id="otp" placeholder="6 Digit OTP">
             <button class="btn" style="background:#007bff;" onclick="verifyOTP()">Verify OTP</button>
@@ -36,12 +34,10 @@
     <h2>Dashboard</h2>
     <div class="card">
         <p style="font-size: 18px;">Balance: <b>₹<span id="user-balance">0.00</span></b></p>
-        <button class="btn" onclick="watchAd()">Watch Video (₹0.10)</button>
     </div>
 </div>
 
 <script>
-// Firebase Configuration (Aapke app se match karta hua)
 const firebaseConfig = {
     apiKey: "AIzaSyDsvE6RNfqPr8X9f7DR3T735lh3hdl7Vb8",
     authDomain: "my-earning-app-78540.firebaseapp.com",
@@ -52,81 +48,38 @@ const firebaseConfig = {
     appId: "1:646826042515:web:a68a3bf1c2848e691966"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
 
-// Initialize Unity Ads
-unityads.UnityAds.initialize("6042395", true);
-
-// Setup Invisible ReCAPTCHA
+// Visible reCAPTCHA setup
 window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-    
-});
 
-// Function: Send OTP
 function sendOTP() {
     const phoneNumber = document.getElementById('phone').value;
-    if(!phoneNumber.includes('+91')) {
-        return alert("Kripya number +91 ke saath daalein (e.g. +919000000000)");
-    }
+    if(!phoneNumber.includes('+91')) return alert("Number +91 ke saath daalein");
 
     auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
         .then((result) => {
             window.confirmationResult = result;
             document.getElementById('otp-div').style.display = 'block';
-            alert("OTP aapke phone par bhej diya gaya hai!");
+            alert("OTP bhej diya gaya hai!");
         }).catch((err) => {
             alert("Error: " + err.message);
-            // Error hone par recaptcha ko reset karna zaroori hai
-            window.recaptchaVerifier.render().then(function(widgetId) {
-                grecaptcha.reset(widgetId);
-            });
+            recaptchaVerifier.render().then(wid => grecaptcha.reset(wid));
         });
 }
 
-// Function: Verify OTP
 function verifyOTP() {
     const code = document.getElementById('otp').value;
-    if(code.length !== 6) return alert("6 digit ka OTP daalein");
-
     confirmationResult.confirm(code).then((result) => {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
-        loadUserData(result.user.uid);
-    }).catch((err) => {
-        alert("OTP galat hai! Fir se koshish karein.");
-    });
-}
-
-// Function: Load Data from Firebase
-function loadUserData(uid) {
-    database.ref('users/' + uid).on('value', (snap) => {
-        const val = snap.val() || { balance: 0 };
-        document.getElementById('user-balance').innerText = val.balance.toFixed(2);
-    });
-}
-
-// Function: Reward Logic (Unity Ads)
-function watchAd() {
-    unityads.UnityAds.show("Rewarded_Android", {
-        onComplete: () => {
-            const userRef = database.ref('users/' + auth.currentUser.uid);
-            userRef.once('value').then((snap) => {
-                const currentData = snap.val() || { balance: 0 };
-                const newBalance = (currentData.balance || 0) + 0.10;
-                userRef.update({ balance: newBalance });
-                alert("Mubarak ho! ₹0.10 aapke balance mein jod diye gaye hain.");
-            });
-        },
-        onFailed: (err) => {
-            alert("Ad poora nahi dekha gaya ya load nahi hua.");
-        }
-    });
+        database.ref('users/' + result.user.uid).on('value', (snap) => {
+            document.getElementById('user-balance').innerText = (snap.val()?.balance || 0).toFixed(2);
+        });
+    }).catch(() => alert("Galat OTP"));
 }
 </script>
-
 </body>
 </html>
-
