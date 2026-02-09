@@ -64,7 +64,7 @@ function sendOTP() {
     
     auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
         .then((result) => {
-            window.confirmationResult = result;
+            confirmationResult = result;
             document.getElementById('otp-div').style.display = 'block';
             alert("OTP bhej diya gaya hai!");
         }).catch((err) => alert("Error: " + err.message));
