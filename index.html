@@ -20,11 +20,11 @@
 <div id="login-section">
     <h2>Secure Login</h2>
     <div class="card">
-        <input type="text" id="phone" placeholder="+91 9876543210">
+        <input type="text" id="phone" placeholder="+91 9878040621">
         <div id="recaptcha-container"></div>
         <button class="btn" onclick="sendOTP()" id="send-btn">Send OTP</button>
         <div id="otp-div" style="display:none; margin-top:20px;">
-            <input type="number" id="otp" placeholder="6 Digit OTP">
+            <input type="number" id="otp" placeholder="Enter 6 Digit OTP">
             <button class="btn" style="background:#007bff;" onclick="verifyOTP()">Verify OTP</button>
         </div>
     </div>
@@ -34,20 +34,24 @@
     <h2>Dashboard</h2>
     <div class="card">
         <p style="font-size: 18px;">Balance: <b>₹<span id="user-balance">0.00</span></b></p>
+        <button class="btn" onclick="alert('Feature coming soon!')">Collect Daily Reward</button>
     </div>
 </div>
 
 <script>
+// Aapke latest screenshot se li gayi sahi configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDsvE6RNfqPr8X9f7DR3T735lh3hdl7Vb8",
-    authDomain: "my-earning-app-78540.firebaseapp.com",
-    databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
-    projectId: "my-earning-app-78540",
-    storageBucket: "my-earning-app-78540.appspot.com",
-    messagingSenderId: "646826042515",
-    appId: "1:646826042515:web:a68a3bf1c2848e691966"
+  apiKey: "AIzaSyDsvE6KNf0pr8X9f7DR8T735lh3hdl7Vb8",
+  authDomain: "my-earning-app-78540.firebaseapp.com",
+  databaseURL: "https://my-earning-app-78540-default-rtdb.firebaseio.com",
+  projectId: "my-earning-app-78540",
+  storageBucket: "my-earning-app-78540.firebasestorage.app",
+  messagingSenderId: "646826042515",
+  appId: "1:646826042515:web:a68a3bf1c284808e691966",
+  measurementId: "G-FTB7N9BYR9"
 };
 
+// Firebase initialize karna
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
@@ -57,7 +61,7 @@ window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-contai
 
 function sendOTP() {
     const phoneNumber = document.getElementById('phone').value;
-    if(!phoneNumber.includes('+91')) return alert("Number +91 ke saath daalein");
+    if(!phoneNumber.includes('+91')) return alert("Kripya number +91 ke saath daalein");
 
     auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
         .then((result) => {
@@ -66,20 +70,27 @@ function sendOTP() {
             alert("OTP bhej diya gaya hai!");
         }).catch((err) => {
             alert("Error: " + err.message);
-            recaptchaVerifier.render().then(wid => grecaptcha.reset(wid));
+            // Error hone par recaptcha reset karna
+            window.recaptchaVerifier.render().then(wid => grecaptcha.reset(wid));
         });
 }
 
 function verifyOTP() {
     const code = document.getElementById('otp').value;
+    if(code.length !== 6) return alert("6 digit ka OTP daalein");
+
     confirmationResult.confirm(code).then((result) => {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
+        
+        // User balance load karna
         database.ref('users/' + result.user.uid).on('value', (snap) => {
-            document.getElementById('user-balance').innerText = (snap.val()?.balance || 0).toFixed(2);
+            const val = snap.val();
+            document.getElementById('user-balance').innerText = (val && val.balance ? val.balance : 0).toFixed(2);
         });
-    }).catch(() => alert("Galat OTP"));
+    }).catch(() => alert("Galat OTP! Fir se koshish karein."));
 }
 </script>
+
 </body>
 </html>
